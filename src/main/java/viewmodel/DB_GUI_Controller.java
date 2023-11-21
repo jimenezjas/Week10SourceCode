@@ -43,6 +43,11 @@ public class DB_GUI_Controller implements Initializable {
     private TableColumn<Person, String> tv_fn, tv_ln, tv_department, tv_major, tv_email;
     private final DbConnectivityClass cnUtil = new DbConnectivityClass();
     private final ObservableList<Person> data = cnUtil.getData();
+    @FXML
+    private Button editButton; // Assuming you have defined these buttons in your FXML file
+    @FXML
+    private Button deleteButton;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -54,6 +59,9 @@ public class DB_GUI_Controller implements Initializable {
             tv_major.setCellValueFactory(new PropertyValueFactory<>("major"));
             tv_email.setCellValueFactory(new PropertyValueFactory<>("email"));
             tv.setItems(data);
+            editButton.disableProperty().bind(tv.getSelectionModel().selectedItemProperty().isNull());
+            deleteButton.disableProperty().bind(tv.getSelectionModel().selectedItemProperty().isNull());
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -114,26 +122,6 @@ public class DB_GUI_Controller implements Initializable {
         }
     }
 
-    @FXML
-    protected void editRecord() {
-        Person p = tv.getSelectionModel().getSelectedItem();
-        int index = data.indexOf(p);
-        Person p2 = new Person(index + 1, first_name.getText(), last_name.getText(), department.getText(),
-                major.getText(), email.getText(),  imageURL.getText());
-        cnUtil.editUser(p.getId(), p2);
-        data.remove(p);
-        data.add(index, p2);
-        tv.getSelectionModel().select(index);
-    }
-
-    @FXML
-    protected void deleteRecord() {
-        Person p = tv.getSelectionModel().getSelectedItem();
-        int index = data.indexOf(p);
-        cnUtil.deleteRecord(p);
-        data.remove(index);
-        tv.getSelectionModel().select(index);
-    }
 
     @FXML
     protected void showImage() {

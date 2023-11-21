@@ -46,6 +46,7 @@ public class MainApplication extends Application {
 
     public void changeScene() {
         try {
+
             Parent newRoot = FXMLLoader.load(getClass().getResource("/view/login.fxml").toURI().toURL());
             Scene currentScene = primaryStage.getScene();
             Parent currentRoot = currentScene.getRoot();
