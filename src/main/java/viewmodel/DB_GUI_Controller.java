@@ -27,11 +27,14 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DB_GUI_Controller implements Initializable {
 
     @FXML
     TextField first_name, last_name, department, major, email, imageURL;
+    private boolean fnValid, lnValid, deptValid, majorValid, emailValid;
     @FXML
     ImageView img_view;
     @FXML
@@ -65,6 +68,21 @@ public class DB_GUI_Controller implements Initializable {
             throw new RuntimeException(e);
         }
 
+        Pattern emailPattern = Pattern.compile("@farmingdale.edu", Pattern.CASE_INSENSITIVE);
+        Pattern fnPattern = Pattern.compile("\s");
+        Pattern lnPattern = Pattern.compile("\s");
+        Pattern deptPattern = Pattern.compile("\s");
+        Pattern majorBusinessPattern = Pattern.compile("business", Pattern.CASE_INSENSITIVE);
+        Pattern majorCSCPattern = Pattern.compile("csc", Pattern.CASE_INSENSITIVE);
+        Pattern majorCPISPattern = Pattern.compile("cpis", Pattern.CASE_INSENSITIVE);
+        Pattern imagePattern = Pattern.compile(""); // add the url base requirements, find later
+
+        first_name.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateFn(fnPattern));
+        last_name.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateLn(lnPattern));
+        department.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateDept(deptPattern));
+        major.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateMajor(majorBusinessPattern, majorCSCPattern, majorCPISPattern));
+        email.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateEmail(emailPattern));
+
         AnimationTimer buttonCheckTimer = new AnimationTimer(){
             @Override
             public void handle(long currently) {
@@ -75,6 +93,41 @@ public class DB_GUI_Controller implements Initializable {
         };
         buttonCheckTimer.start();
     }
+    public void validateFn(Pattern fnPattern){
+        Matcher fnMatcher = fnPattern.matcher(first_name.getText());
+        fnValid = fnMatcher.find();
+        validCheck();
+    }
+    public void validateLn(Pattern lnPattern){
+        Matcher lnMatcher = lnPattern.matcher(last_name.getText());
+        lnValid = lnMatcher.find();
+        validCheck();
+    }
+    public void validateDept(Pattern deptPattern){
+        Matcher deptMatcher = deptPattern.matcher(department.getText());
+        deptValid = deptMatcher.find();
+        validCheck();
+    }
+    //this is the dumbest way I could have done this, but its the only one I could coherently think of.
+    public void validateMajor(Pattern business, Pattern csc, Pattern cpis){
+        Matcher businessMatcher = business.matcher(department.getText());
+        Matcher cscMatcher = csc.matcher(department.getText());
+        Matcher cpisMatcher = cpis.matcher(department.getText());
+        if(businessMatcher.find()){
+            majorValid = true;
+        } else if(cscMatcher.find()){
+            majorValid = true;
+        } else if(cpisMatcher.find()){
+            majorValid = true;
+        }
+        validCheck();
+    }
+    public void validateEmail(Pattern emailPattern){
+        Matcher emailMatcher = emailPattern.matcher(email.getText());
+        emailValid = emailMatcher.find();
+        validCheck();
+    }
+
     public void editButtonCheck(){
         tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->{
             if(newValue != null) {
@@ -95,6 +148,7 @@ public class DB_GUI_Controller implements Initializable {
     }
     public void addButtonCheck(){
         //need to make regex patterns for each text field, then just setup a listener to each variable and enable and disable. you can copy this from assignment 9.
+        boolean shouldEnable = fnValid && lnValid && deptValid && majorValid && emailValid;
     }
 
     @FXML
