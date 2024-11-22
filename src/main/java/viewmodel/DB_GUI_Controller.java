@@ -1,6 +1,7 @@
 package viewmodel;
 
 import dao.DbConnectivityClass;
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -41,6 +42,12 @@ public class DB_GUI_Controller implements Initializable {
     private TableColumn<Person, Integer> tv_id;
     @FXML
     private TableColumn<Person, String> tv_fn, tv_ln, tv_department, tv_major, tv_email;
+    @FXML
+    private Button editBtn;
+    @FXML
+    private Button deleteBtn;
+    @FXML
+    private Button addBtn;
     private final DbConnectivityClass cnUtil = new DbConnectivityClass();
     private final ObservableList<Person> data = cnUtil.getData();
 
@@ -57,11 +64,41 @@ public class DB_GUI_Controller implements Initializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        AnimationTimer buttonCheckTimer = new AnimationTimer(){
+            @Override
+            public void handle(long currently) {
+                editButtonCheck();
+                deleteButtonCheck();
+                addButtonCheck();
+            }
+        };
+        buttonCheckTimer.start();
+    }
+    public void editButtonCheck(){
+        tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->{
+            if(newValue != null) {
+                editBtn.setDisable(false);
+            } else {
+                editBtn.setDisable(true);
+            }
+        });
+    }
+    public void deleteButtonCheck(){
+        tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->{
+            if(newValue != null) {
+                editBtn.setDisable(false);
+            } else {
+                editBtn.setDisable(true);
+            }
+        });
+    }
+    public void addButtonCheck(){
+        //need to make regex patterns for each text field, then just setup a listener to each variable and enable and disable. you can copy this from assignment 9.
     }
 
     @FXML
     protected void addNewRecord() {
-
             Person p = new Person(first_name.getText(), last_name.getText(), department.getText(),
                     major.getText(), email.getText(), imageURL.getText());
             cnUtil.insertUser(p);
@@ -69,7 +106,7 @@ public class DB_GUI_Controller implements Initializable {
             p.setId(cnUtil.retrieveId(p));
             data.add(p);
             clearForm();
-
+            //add a label and make it react whenever you interact with the button. that would be done HERE. could use an imageView here for the "Your Touch" part.
     }
 
     @FXML
