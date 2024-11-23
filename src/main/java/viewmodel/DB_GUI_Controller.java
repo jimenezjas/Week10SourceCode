@@ -33,8 +33,10 @@ import java.util.regex.Pattern;
 public class DB_GUI_Controller implements Initializable {
 
     @FXML
-    TextField first_name, last_name, department, major, email, imageURL;
-    private boolean fnValid, lnValid, deptValid, majorValid, emailValid;
+    TextField first_name, last_name, department, email, imageURL;
+    private boolean fnValid, lnValid, deptValid, emailValid;
+    @FXML
+    ComboBox majorField;
     @FXML
     ImageView img_view;
     @FXML
@@ -67,7 +69,7 @@ public class DB_GUI_Controller implements Initializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
+        addBtn.setDisable(true);
         Pattern emailPattern = Pattern.compile("@farmingdale.edu", Pattern.CASE_INSENSITIVE);
         Pattern fnPattern = Pattern.compile("\s");
         Pattern lnPattern = Pattern.compile("\s");
@@ -80,7 +82,6 @@ public class DB_GUI_Controller implements Initializable {
         first_name.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateFn(fnPattern));
         last_name.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateLn(lnPattern));
         department.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateDept(deptPattern));
-        major.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateMajor(majorBusinessPattern, majorCSCPattern, majorCPISPattern));
         email.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> validateEmail(emailPattern));
 
         AnimationTimer buttonCheckTimer = new AnimationTimer(){
@@ -88,7 +89,6 @@ public class DB_GUI_Controller implements Initializable {
             public void handle(long currently) {
                 editButtonCheck();
                 deleteButtonCheck();
-                addButtonCheck();
             }
         };
         buttonCheckTimer.start();
@@ -96,36 +96,23 @@ public class DB_GUI_Controller implements Initializable {
     public void validateFn(Pattern fnPattern){
         Matcher fnMatcher = fnPattern.matcher(first_name.getText());
         fnValid = fnMatcher.find();
-        validCheck();
+        addButtonCheck();
     }
     public void validateLn(Pattern lnPattern){
         Matcher lnMatcher = lnPattern.matcher(last_name.getText());
         lnValid = lnMatcher.find();
-        validCheck();
+        addButtonCheck();
     }
     public void validateDept(Pattern deptPattern){
         Matcher deptMatcher = deptPattern.matcher(department.getText());
         deptValid = deptMatcher.find();
-        validCheck();
+        addButtonCheck();
     }
-    //this is the dumbest way I could have done this, but its the only one I could coherently think of.
-    public void validateMajor(Pattern business, Pattern csc, Pattern cpis){
-        Matcher businessMatcher = business.matcher(department.getText());
-        Matcher cscMatcher = csc.matcher(department.getText());
-        Matcher cpisMatcher = cpis.matcher(department.getText());
-        if(businessMatcher.find()){
-            majorValid = true;
-        } else if(cscMatcher.find()){
-            majorValid = true;
-        } else if(cpisMatcher.find()){
-            majorValid = true;
-        }
-        validCheck();
-    }
+
     public void validateEmail(Pattern emailPattern){
         Matcher emailMatcher = emailPattern.matcher(email.getText());
         emailValid = emailMatcher.find();
-        validCheck();
+        addButtonCheck();
     }
 
     public void editButtonCheck(){
@@ -147,14 +134,14 @@ public class DB_GUI_Controller implements Initializable {
         });
     }
     public void addButtonCheck(){
-        //need to make regex patterns for each text field, then just setup a listener to each variable and enable and disable. you can copy this from assignment 9.
-        boolean shouldEnable = fnValid && lnValid && deptValid && majorValid && emailValid;
+        boolean shouldEnable = fnValid && lnValid && deptValid && emailValid;
+        addBtn.setDisable(!shouldEnable);
     }
 
     @FXML
     protected void addNewRecord() {
             Person p = new Person(first_name.getText(), last_name.getText(), department.getText(),
-                    major.getText(), email.getText(), imageURL.getText());
+                    (String) majorField.getValue(), email.getText(), imageURL.getText());
             cnUtil.insertUser(p);
             cnUtil.retrieveId(p);
             p.setId(cnUtil.retrieveId(p));
@@ -168,7 +155,7 @@ public class DB_GUI_Controller implements Initializable {
         first_name.setText("");
         last_name.setText("");
         department.setText("");
-        major.setText("");
+        majorField.setValue(null);
         email.setText("");
         imageURL.setText("");
     }
@@ -210,7 +197,7 @@ public class DB_GUI_Controller implements Initializable {
         Person p = tv.getSelectionModel().getSelectedItem();
         int index = data.indexOf(p);
         Person p2 = new Person(index + 1, first_name.getText(), last_name.getText(), department.getText(),
-                major.getText(), email.getText(),  imageURL.getText());
+                (String) majorField.getValue(), email.getText(),  imageURL.getText());
         cnUtil.editUser(p.getId(), p2);
         data.remove(p);
         data.add(index, p2);
@@ -245,7 +232,7 @@ public class DB_GUI_Controller implements Initializable {
         first_name.setText(p.getFirstName());
         last_name.setText(p.getLastName());
         department.setText(p.getDepartment());
-        major.setText(p.getMajor());
+        majorField.setValue(p.getMajor());
         email.setText(p.getEmail());
         imageURL.setText(p.getImageURL());
     }
