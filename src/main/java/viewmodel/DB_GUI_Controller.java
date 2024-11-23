@@ -2,6 +2,7 @@ package viewmodel;
 
 import dao.DbConnectivityClass;
 import javafx.animation.AnimationTimer;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,10 +20,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import model.Person;
 import service.MyLogger;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -39,6 +41,8 @@ public class DB_GUI_Controller implements Initializable {
     ComboBox majorField;
     @FXML
     ImageView img_view;
+    @FXML
+    Label userMessage;
     @FXML
     MenuBar menuBar;
     @FXML
@@ -57,7 +61,7 @@ public class DB_GUI_Controller implements Initializable {
     private final ObservableList<Person> data = cnUtil.getData();
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public synchronized void initialize(URL url, ResourceBundle resourceBundle) {
         try {
             tv_id.setCellValueFactory(new PropertyValueFactory<>("id"));
             tv_fn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
@@ -93,29 +97,29 @@ public class DB_GUI_Controller implements Initializable {
         };
         buttonCheckTimer.start();
     }
-    public void validateFn(Pattern fnPattern){
+    public synchronized void validateFn(Pattern fnPattern){
         Matcher fnMatcher = fnPattern.matcher(first_name.getText());
         fnValid = fnMatcher.find();
         addButtonCheck();
     }
-    public void validateLn(Pattern lnPattern){
+    public synchronized void validateLn(Pattern lnPattern){
         Matcher lnMatcher = lnPattern.matcher(last_name.getText());
         lnValid = lnMatcher.find();
         addButtonCheck();
     }
-    public void validateDept(Pattern deptPattern){
+    public synchronized void validateDept(Pattern deptPattern){
         Matcher deptMatcher = deptPattern.matcher(department.getText());
         deptValid = deptMatcher.find();
         addButtonCheck();
     }
 
-    public void validateEmail(Pattern emailPattern){
+    public synchronized void validateEmail(Pattern emailPattern){
         Matcher emailMatcher = emailPattern.matcher(email.getText());
         emailValid = emailMatcher.find();
         addButtonCheck();
     }
 
-    public void editButtonCheck(){
+    public synchronized void editButtonCheck(){
         tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->{
             if(newValue != null) {
                 editBtn.setDisable(false);
@@ -124,7 +128,7 @@ public class DB_GUI_Controller implements Initializable {
             }
         });
     }
-    public void deleteButtonCheck(){
+    public synchronized void deleteButtonCheck(){
         tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->{
             if(newValue != null) {
                 editBtn.setDisable(false);
@@ -133,13 +137,20 @@ public class DB_GUI_Controller implements Initializable {
             }
         });
     }
-    public void addButtonCheck(){
+    public synchronized void addButtonCheck(){
         boolean shouldEnable = fnValid && lnValid && deptValid && emailValid;
         addBtn.setDisable(!shouldEnable);
+
+        userMessage.setText("Information added!");
+        PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+        messageTransition.setOnFinished(event -> {
+            userMessage.setText("Welcome to the Database!");
+        });
+        messageTransition.play();
     }
 
     @FXML
-    protected void addNewRecord() {
+    protected synchronized void addNewRecord() {
             Person p = new Person(first_name.getText(), last_name.getText(), department.getText(),
                     (String) majorField.getValue(), email.getText(), imageURL.getText());
             cnUtil.insertUser(p);
@@ -147,11 +158,10 @@ public class DB_GUI_Controller implements Initializable {
             p.setId(cnUtil.retrieveId(p));
             data.add(p);
             clearForm();
-            //add a label and make it react whenever you interact with the button. that would be done HERE. could use an imageView here for the "Your Touch" part.
     }
 
     @FXML
-    protected void clearForm() {
+    protected synchronized void clearForm() {
         first_name.setText("");
         last_name.setText("");
         department.setText("");
@@ -161,7 +171,7 @@ public class DB_GUI_Controller implements Initializable {
     }
 
     @FXML
-    protected void logOut(ActionEvent actionEvent) {
+    protected synchronized void logOut(ActionEvent actionEvent) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/view/login.fxml"));
             Scene scene = new Scene(root, 900, 600);
@@ -175,12 +185,12 @@ public class DB_GUI_Controller implements Initializable {
     }
 
     @FXML
-    protected void closeApplication() {
+    protected synchronized void closeApplication() {
         System.exit(0);
     }
 
     @FXML
-    protected void displayAbout() {
+    protected synchronized void displayAbout() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/view/about.fxml"));
             Stage stage = new Stage();
@@ -193,7 +203,7 @@ public class DB_GUI_Controller implements Initializable {
     }
 
     @FXML
-    protected void editRecord() {
+    protected synchronized void editRecord() {
         Person p = tv.getSelectionModel().getSelectedItem();
         int index = data.indexOf(p);
         Person p2 = new Person(index + 1, first_name.getText(), last_name.getText(), department.getText(),
@@ -202,19 +212,33 @@ public class DB_GUI_Controller implements Initializable {
         data.remove(p);
         data.add(index, p2);
         tv.getSelectionModel().select(index);
+
+        userMessage.setText("Updated information!");
+        PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+        messageTransition.setOnFinished(event -> {
+            userMessage.setText("Welcome to the Database!");
+        });
+        messageTransition.play();
     }
 
     @FXML
-    protected void deleteRecord() {
+    protected synchronized void deleteRecord() {
         Person p = tv.getSelectionModel().getSelectedItem();
         int index = data.indexOf(p);
         cnUtil.deleteRecord(p);
         data.remove(index);
         tv.getSelectionModel().select(index);
+
+        userMessage.setText("Deleted information!");
+        PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+        messageTransition.setOnFinished(event -> {
+            userMessage.setText("Welcome to the Database!");
+        });
+        messageTransition.play();
     }
 
     @FXML
-    protected void showImage() {
+    protected synchronized void showImage() {
         File file = (new FileChooser()).showOpenDialog(img_view.getScene().getWindow());
         if (file != null) {
             img_view.setImage(new Image(file.toURI().toString()));
@@ -222,12 +246,12 @@ public class DB_GUI_Controller implements Initializable {
     }
 
     @FXML
-    protected void addRecord() {
+    protected synchronized void addRecord() {
         showSomeone();
     }
 
     @FXML
-    protected void selectedItemTV(MouseEvent mouseEvent) {
+    protected synchronized void selectedItemTV(MouseEvent mouseEvent) {
         Person p = tv.getSelectionModel().getSelectedItem();
         first_name.setText(p.getFirstName());
         last_name.setText(p.getLastName());
@@ -237,7 +261,7 @@ public class DB_GUI_Controller implements Initializable {
         imageURL.setText(p.getImageURL());
     }
 
-    public void lightTheme(ActionEvent actionEvent) {
+    public synchronized void lightTheme(ActionEvent actionEvent) {
         try {
             Scene scene = menuBar.getScene();
             Stage stage = (Stage) scene.getWindow();
@@ -252,7 +276,7 @@ public class DB_GUI_Controller implements Initializable {
         }
     }
 
-    public void darkTheme(ActionEvent actionEvent) {
+    public synchronized void darkTheme(ActionEvent actionEvent) {
         try {
             Stage stage = (Stage) menuBar.getScene().getWindow();
             Scene scene = stage.getScene();
@@ -263,7 +287,7 @@ public class DB_GUI_Controller implements Initializable {
         }
     }
 
-    public void showSomeone() {
+    public synchronized void showSomeone() {
         Dialog<Results> dialog = new Dialog<>();
         dialog.setTitle("New User");
         dialog.setHeaderText("Please specify…");
@@ -304,6 +328,87 @@ public class DB_GUI_Controller implements Initializable {
             this.fname = name;
             this.lname = date;
             this.major = venue;
+        }
+    }
+
+    public synchronized void exportToCSV(){
+        FileChooser fileExporter = new FileChooser();
+        //restricts the file type to just csv
+        fileExporter.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        //prompts user with the file explorer window to select a valid csv file
+        File exportedFile = fileExporter.showSaveDialog(menuBar.getScene().getWindow());
+
+        //if the file is found successfully
+        if(exportedFile != null){
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(exportedFile))) {
+                //sets up categories
+                writer.write("ID, First Name, Last Name, Department, Major, Email, Image URL");
+                writer.newLine();
+                for (Person person : data){
+                    //takes all variables from each person in the TableView and puts it one at a time as a line into the file
+                    writer.write(person.getId() + "," +
+                            person.getFirstName() + "," +
+                            person.getLastName() + "," +
+                            person.getDepartment() + "," +
+                            person.getMajor() + "," +
+                            person.getEmail() + "," +
+                            person.getImageURL());
+                    writer.newLine();
+                }
+                //status report
+                userMessage.setText("Data exported!");
+                PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+                messageTransition.setOnFinished(event -> {
+                    userMessage.setText("Welcome to the Database!");
+                });
+                messageTransition.play();
+            } catch(IOException e){
+                //if they fail to select a file / the file they chose wasn't a CSV file
+                e.printStackTrace();
+                userMessage.setText("Error exporting data...");
+                PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+                messageTransition.setOnFinished(event -> {
+                    userMessage.setText("Welcome to the Database!");
+                });
+            }
+        }
+    }
+
+    public synchronized void importCSVFile(){
+        FileChooser fileImporter = new FileChooser();
+        fileImporter.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+
+        File importedFile = fileImporter.showOpenDialog(menuBar.getScene().getWindow());
+        if(importedFile != null){
+            try(BufferedReader reader = new BufferedReader(new FileReader(importedFile))) {
+                String line;
+                ObservableList<Person> importedData = FXCollections.observableArrayList();
+                reader.readLine();
+                //reads each line of the file, every 6 segments that are separated by comma are then put into an array -> Person
+                while((line = reader.readLine()) != null){
+                    String[] values = line.split(",");
+                    if(values.length == 6){
+                        Person importedPerson = new Person(values[0], values[1], values[2], values[3], values[4], values[5]);
+                        importedData.add(importedPerson);
+                    }
+                }
+                //clears and inputs all the imported data
+                data.clear();
+                data.addAll(importedData);
+
+                userMessage.setText("Data imported!");
+                PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+                messageTransition.setOnFinished(event -> {
+                    userMessage.setText("Welcome to the Database!");
+                });
+            } catch(IOException e){
+                e.printStackTrace();
+                userMessage.setText("Data failed to import...");
+                PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+                messageTransition.setOnFinished(event -> {
+                    userMessage.setText("Welcome to the Database!");
+                });
+            }
         }
     }
 

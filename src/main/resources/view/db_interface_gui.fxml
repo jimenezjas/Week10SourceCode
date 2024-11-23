@@ -53,6 +53,12 @@
                         <MenuItem mnemonicParsing="false" onAction="#displayAbout" styleClass="menu_items" text="About" />
                             </items>
                         </Menu>
+                  <Menu mnemonicParsing="false" text="CSV">
+                    <items>
+                      <MenuItem fx:id="importCSV" mnemonicParsing="false" onAction="#importCSVFile" text="Import CSV File" />
+                        <MenuItem fx:id="exportCSV" mnemonicParsing="false" onAction="#exportToCSV" text="Export CSV File" />
+                    </items>
+                  </Menu>
                     </menus>
                 </MenuBar>
             </top>
@@ -72,7 +78,14 @@
                 </VBox>
             </left>
             <bottom>
-                <HBox prefHeight="30.0" prefWidth="892.0" styleClass="admin_section" BorderPane.alignment="CENTER" />
+                <HBox prefHeight="30.0" prefWidth="892.0" styleClass="admin_section" BorderPane.alignment="CENTER">
+               <children>
+                  <Label fx:id="userMessage" text="Welcome to the Database!" translateX="335.0" translateY="2.0">
+                     <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" top="5.0" />
+                     </HBox.margin>
+                  </Label>
+               </children></HBox>
             </bottom>
          <right>
                 <VBox prefHeight="540.0" prefWidth="202.0" styleClass="text_field_pane" BorderPane.alignment="CENTER">

@@ -1,17 +1,46 @@
 package viewmodel;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import service.UserSession;
 
 public class SignUpController {
+
+    @FXML
+    TextField newUsername, newPassword, newPassConfirm;
+
     public void createNewAccount(ActionEvent actionEvent) {
+        String username = newUsername.getText();
+        String password = newPassword.getText();
+        String passConfirm = newPassConfirm.getText();
+
+        if(username.isEmpty() || password.isEmpty() || passConfirm.isEmpty()){
+            showAlert("Please input information into all fields.");
+            return;
+        }
+        if(!password.equals(passConfirm)){
+            showAlert("Passwords do not match.");
+            return;
+        }
+
+        UserSession newSession = UserSession.getInstance(username, password, "USER");
+
+        showAlert("Account created!");
+        goBack(actionEvent);
+    }
+
+
+
+    public void showAlert(String message){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setContentText("Info for the user. Message goes here");
+        alert.setContentText(message);
         alert.showAndWait();
     }
 
@@ -27,4 +56,5 @@ public class SignUpController {
             e.printStackTrace();
         }
     }
+
 }
