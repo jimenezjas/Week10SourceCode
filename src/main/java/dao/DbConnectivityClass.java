@@ -10,8 +10,9 @@ public class DbConnectivityClass {
     final static String DB_NAME="jimenezjasdb";
         MyLogger lg= new MyLogger();
         final static String SQL_SERVER_URL = "jdbc:mysql://jimenezjasdb.mysql.database.azure.com:3306/";//update this server name
-        final static String DB_URL = "jdbc:mysql://jimenezjasdb.mysql.database.azure.com:3306/"+DB_NAME;//update this database name
-        final static String USERNAME = "jimenezjas@jimenezjasdb.mysql.database.azure.com";// update this username
+        final static String DB_TRUERL = "jdbc:mysql://jimenezjasdb.mysql.database.azure.com:3306/jimenezjasdb";
+        final static String DB_URL = DB_TRUERL + "?useSSL=true&&requireSSL+true";//update this database name
+        final static String USERNAME = "jimenezjas";// update this username
         final static String PASSWORD = "adminpassword8$";// update this password
 
 
@@ -62,7 +63,7 @@ public class DbConnectivityClass {
                 conn.close();
 
                 //Second, connect to the database and create the table "users" if cot created
-                conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                conn = DriverManager.getConnection(DB_TRUERL + DB_NAME, USERNAME, PASSWORD);
                 statement = conn.createStatement();
                 String sql = "CREATE TABLE IF NOT EXISTS users (" + "id INT( 10 ) NOT NULL PRIMARY KEY AUTO_INCREMENT,"
                         + "first_name VARCHAR(200) NOT NULL," + "last_name VARCHAR(200) NOT NULL,"
@@ -73,7 +74,6 @@ public class DbConnectivityClass {
                 statement.executeUpdate(sql);
 
                 //check if we have users in the table users
-                statement = conn.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM users");
 
                 if (resultSet.next()) {
@@ -96,7 +96,7 @@ public class DbConnectivityClass {
         public void queryUserByLastName(String name) {
             connectToDatabase();
             try {
-                Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                Connection conn = DriverManager.getConnection(DB_TRUERL, USERNAME, PASSWORD);
                 String sql = "SELECT * FROM users WHERE last_name = ?";
                 PreparedStatement preparedStatement = conn.prepareStatement(sql);
                 preparedStatement.setString(1, name);
@@ -123,7 +123,7 @@ public class DbConnectivityClass {
         public void listAllUsers() {
             connectToDatabase();
             try {
-                Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                Connection conn = DriverManager.getConnection(DB_TRUERL, USERNAME, PASSWORD);
                 String sql = "SELECT * FROM users ";
                 PreparedStatement preparedStatement = conn.prepareStatement(sql);
 
@@ -151,7 +151,7 @@ public class DbConnectivityClass {
         public void insertUser(Person person) {
             connectToDatabase();
             try {
-                Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                Connection conn = DriverManager.getConnection(DB_TRUERL, USERNAME, PASSWORD);
                 String sql = "INSERT INTO users (first_name, last_name, department, major, email, imageURL) VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = conn.prepareStatement(sql);
                 preparedStatement.setString(1, person.getFirstName());
@@ -174,7 +174,7 @@ public class DbConnectivityClass {
         public void editUser(int id, Person p) {
             connectToDatabase();
             try {
-                Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                Connection conn = DriverManager.getConnection(DB_TRUERL, USERNAME, PASSWORD);
                 String sql = "UPDATE users SET first_name=?, last_name=?, department=?, major=?, email=?, imageURL=? WHERE id=?";
                 PreparedStatement preparedStatement = conn.prepareStatement(sql);
                 preparedStatement.setString(1, p.getFirstName());
@@ -196,7 +196,7 @@ public class DbConnectivityClass {
             int id = person.getId();
             connectToDatabase();
             try {
-                Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                Connection conn = DriverManager.getConnection(DB_TRUERL, USERNAME, PASSWORD);
                 String sql = "DELETE FROM users WHERE id=?";
                 PreparedStatement preparedStatement = conn.prepareStatement(sql);
                 preparedStatement.setInt(1, id);
@@ -213,7 +213,7 @@ public class DbConnectivityClass {
             connectToDatabase();
             int id;
             try {
-                Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                Connection conn = DriverManager.getConnection(DB_TRUERL, USERNAME, PASSWORD);
                 String sql = "SELECT id FROM users WHERE email=?";
                 PreparedStatement preparedStatement = conn.prepareStatement(sql);
                 preparedStatement.setString(1, p.getEmail());
@@ -234,10 +234,13 @@ public class DbConnectivityClass {
         public boolean validateLogin(String username, String password){
             boolean validLogin = false;
             try{
-                Connection connection = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-                String sql = "SELECT password FROM users WHERE username = ?";
+                Connection connection = DriverManager.getConnection(DB_TRUERL, USERNAME, PASSWORD);
+                String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
                 preparedStatement.setString(1, username);
+                preparedStatement.setString(2,password);
+
                 ResultSet resultSet = preparedStatement.executeQuery();
 
                 if(resultSet.next()){
@@ -250,6 +253,7 @@ public class DbConnectivityClass {
                 connection.close();
             } catch(SQLException e){
                 e.printStackTrace();
+                return false;
             }
             return validLogin;
         }

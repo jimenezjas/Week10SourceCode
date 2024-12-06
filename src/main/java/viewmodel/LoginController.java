@@ -60,7 +60,10 @@ public class LoginController {
     @FXML
     public void login(ActionEvent actionEvent) {
         DbConnectivityClass db = new DbConnectivityClass();
-        if (db.validateLogin(usernameTextField.getText(), passwordField.getText())) {
+        String username = usernameTextField.getText();
+        String password = passwordField.getText();
+
+        if (db.validateLogin(username, password)) {
             try {
                 Parent root = FXMLLoader.load(getClass().getResource("/view/db_interface_gui.fxml"));
                 Scene scene = new Scene(root, 900, 600);

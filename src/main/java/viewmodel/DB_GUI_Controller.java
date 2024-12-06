@@ -16,6 +16,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -38,6 +41,8 @@ public class DB_GUI_Controller implements Initializable {
     TextField first_name, last_name, department, email, imageURL;
     private boolean fnValid, lnValid, deptValid, emailValid;
     @FXML
+    private ImageView profilePic;
+    @FXML
     ComboBox majorField;
     @FXML
     ImageView img_view;
@@ -57,8 +62,12 @@ public class DB_GUI_Controller implements Initializable {
     private Button deleteBtn;
     @FXML
     private Button addBtn;
+    @FXML
+    private MenuItem CopyItem, ClearItem, deleteItem, editItem;
+
     private final DbConnectivityClass cnUtil = new DbConnectivityClass();
     private final ObservableList<Person> data = cnUtil.getData();
+
 
     @Override
     public synchronized void initialize(URL url, ResourceBundle resourceBundle) {
@@ -96,6 +105,11 @@ public class DB_GUI_Controller implements Initializable {
             }
         };
         buttonCheckTimer.start();
+
+        CopyItem.setAccelerator(KeyCombination.keyCombination("Ctrl+C"));
+        editItem.setAccelerator(KeyCombination.keyCombination("Ctrl+E"));
+        deleteItem.setAccelerator(KeyCombination.keyCombination("Ctrl+D"));
+        ClearItem.setAccelerator(KeyCombination.keyCombination("Ctrl+R"));
     }
     public synchronized void validateFn(Pattern fnPattern){
         Matcher fnMatcher = fnPattern.matcher(first_name.getText());
@@ -203,6 +217,19 @@ public class DB_GUI_Controller implements Initializable {
     }
 
     @FXML
+    protected synchronized void displayHelp() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/view/help.fxml"));
+            Stage stage = new Stage();
+            Scene scene = new Scene(root, 600, 500);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     protected synchronized void editRecord() {
         Person p = tv.getSelectionModel().getSelectedItem();
         int index = data.indexOf(p);
@@ -253,12 +280,16 @@ public class DB_GUI_Controller implements Initializable {
     @FXML
     protected synchronized void selectedItemTV(MouseEvent mouseEvent) {
         Person p = tv.getSelectionModel().getSelectedItem();
+
+        Image currentProfile = new Image(p.getImageURL());
+
         first_name.setText(p.getFirstName());
         last_name.setText(p.getLastName());
         department.setText(p.getDepartment());
         majorField.setValue(p.getMajor());
         email.setText(p.getEmail());
         imageURL.setText(p.getImageURL());
+        profilePic.setImage(currentProfile);
     }
 
     public synchronized void lightTheme(ActionEvent actionEvent) {
@@ -411,5 +442,35 @@ public class DB_GUI_Controller implements Initializable {
             }
         }
     }
+
+    @FXML
+    public synchronized void copyToClipboard(){
+        Person selectedPerson = tv.getSelectionModel().getSelectedItem();
+
+        if(selectedPerson != null) {
+            String personInfo = "First Name: " + selectedPerson.getFirstName() + "\n" +
+                    "Last Name: " + selectedPerson.getLastName() + "\n" +
+                    "Department: " + selectedPerson.getDepartment() + "\n" +
+                    "Major: " + selectedPerson.getMajor() + "\n" +
+                    "Email: " + selectedPerson.getEmail() + "\n" +
+                    "Image URL: " + selectedPerson.getImageURL();
+
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent copiedContent = new ClipboardContent();
+
+            copiedContent.putString(personInfo);
+            clipboard.setContent(copiedContent);
+
+            userMessage.setText("Information copied to clipboard!");
+            PauseTransition messageTransition = new PauseTransition(Duration.seconds(5));
+            messageTransition.setOnFinished(event -> {
+                userMessage.setText("Welcome to the Database!");
+            });
+            messageTransition.play();
+        } else {
+            userMessage.setText("Unable to copy.");
+        }
+    }
+
 
 }

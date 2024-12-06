@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.image.Image?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TextArea layoutX="6.0" layoutY="51.0" prefHeight="187.0" prefWidth="584.0" text="CTRL + C : Copies the selected person to the clipboard.&#10;&#10;CTRL + E : Edits the information of the selected person.&#10;&#10;CTRL + D : Deletes the information of the selected person.&#10;&#10;CTRL + R : Clears all information from the chart." wrapText="true">
+         <font>
+            <Font name="System Bold" size="16.0" />
+         </font>
+      </TextArea>
+      <Label alignment="TOP_LEFT" layoutX="8.0" layoutY="11.0" prefHeight="44.0" prefWidth="542.0" text="Help - Shortcuts">
+         <font>
+            <Font name="System Bold" size="26.0" />
+         </font>
+      </Label>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="386.0" layoutY="238.0" pickOnBounds="true" preserveRatio="true">
+      <image>
+         <Image url="@../images/helpGif.gif" />
+      </image>
+      </ImageView>
+   </children>
+</AnchorPane>
