@@ -1,10 +1,10 @@
 .db_btn {
-    -fx-background-color: #a73;
+    -fx-background-color: rgb(0,0,0);
     -fx-cursor: hand;
     -fx-font-family: "Arial";
     -fx-font-size: 15px;
     -fx-text-alignment: center;
-    -fx-text-fill: #000000;
+    -fx-text-fill: #ffffff;
     -fx-alignment: CENTER;
     -fx-background-radius: 10;
     -fx-pref-width:200px;
@@ -12,13 +12,13 @@
 }
 
 .left_pane {
-    -fx-background-color: #a73;
+    -fx-background-color: rgb(66,66,66);
     -fx-pref-width: 130px;
     -fx-pref-height: 600px;
 }
 
 .admin_section {
-    -fx-background-color: #999;
+    -fx-background-color: rgb(179,179,179);
 }
 
 .table_columns {
@@ -28,20 +28,20 @@
 
 
 .menu_bar {
-    -fx-background-color: #841;
+    -fx-background-color: rgb(179,179,179);
 }
 
 .anchor_pane {
-    -fx-background-color: #a73;
+    -fx-background-color: rgb(0, 0, 0);
 }
 
 .text_field_pane {
-    -fx-background-color: #79dc05;
+    -fx-background-color: #6d6d6d;
 
 }
 
 .image_view{
-    -fx-background-color: yellow;
+    -fx-background-color: white;
     -fx-border-color: black;
     -fx-border-width: 2;
 }
@@ -62,7 +62,7 @@
 .table-view .cell{
    -fx-cell-size: 35;
   -fx-alignment: center-left;
-  -fx-background-color: #FFFFFF;
+  -fx-background-color: #ebebeb;
   -fx-border-color: #29292D;
   -fx-text-fill: black;
   -fx-alignment: CENTER_LEFT;
@@ -70,7 +70,7 @@
 }
 .table-row-cell:selected {
    -fx-background-color: whitesmoke;
-   -fx-text-background-color:  #33FF55;
+   -fx-text-background-color:  #FFFFFF;
 
 
 }

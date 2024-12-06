@@ -7,18 +7,17 @@ import service.MyLogger;
 
 import java.sql.*;
 public class DbConnectivityClass {
-    final static String DB_NAME="CSC311_BD_TEMP";
+    final static String DB_NAME="jimenezjasdb";
         MyLogger lg= new MyLogger();
-        final static String SQL_SERVER_URL = "jdbc:mysql://csc311jimenezjas1.mysql.database.azure.com";//update this server name
-        final static String DB_URL = "jdbc:mysql://csc311jimenezjas1.mysql.database.azure.com/"+DB_NAME;//update this database name
-        final static String USERNAME = "jimenezjas@csc311jimenezjas1";// update this username
-        final static String PASSWORD = "Adminpassword8";// update this password
+        final static String SQL_SERVER_URL = "jdbc:mysql://jimenezjasdb.mysql.database.azure.com:3306/";//update this server name
+        final static String DB_URL = "jdbc:mysql://jimenezjasdb.mysql.database.azure.com:3306/"+DB_NAME;//update this database name
+        final static String USERNAME = "jimenezjas@jimenezjasdb.mysql.database.azure.com";// update this username
+        final static String PASSWORD = "adminpassword8$";// update this password
 
 
         private final ObservableList<Person> data = FXCollections.observableArrayList();
 
         // Method to retrieve all data from the database and store it into an observable list to use in the GUI tableview.
-
 
         public ObservableList<Person> getData() {
             connectToDatabase();
@@ -230,5 +229,28 @@ public class DbConnectivityClass {
             }
             lg.makeLog(String.valueOf(id));
             return id;
+        }
+
+        public boolean validateLogin(String username, String password){
+            boolean validLogin = false;
+            try{
+                Connection connection = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+                String sql = "SELECT password FROM users WHERE username = ?";
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setString(1, username);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                if(resultSet.next()){
+                    String storedPassword = resultSet.getString("password");
+                    if (password.equals(storedPassword)) {
+                        validLogin = true;
+                    }
+                }
+                preparedStatement.close();
+                connection.close();
+            } catch(SQLException e){
+                e.printStackTrace();
+            }
+            return validLogin;
         }
     }
